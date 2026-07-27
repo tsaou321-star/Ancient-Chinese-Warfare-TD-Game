@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>還不快救主！・v0.10.3 房間連線修正版</title>
+<title>還不快救主！・v0.10.4 房間直連與存檔救援版</title>
 <meta name="theme-color" content="#eadfce">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1885,6 +1885,9 @@ class EventBus {
 // a cloud repository can replace or complement it later without changing game logic.
 const PROFILE_STORAGE_KEY = 'zhao-yun-adou.profile.v10';
 const PROFILE_BACKUP_STORAGE_KEY = 'zhao-yun-adou.profile.backup.v10';
+const LEGACY_PROFILE_BACKUP_STORAGE_KEYS = Object.freeze([
+  'zhao-yun-adou.profile.backup.v9'
+]);
 const PROFILE_MIGRATION_MARKER_KEY = 'zhao-yun-adou.profile.migrated.v10';
 const PROFILE_DEVICE_ID_KEY = 'zhao-yun-adou.device.v1';
 const LEGACY_PROFILE_STORAGE_KEYS = Object.freeze([
@@ -2254,29 +2257,35 @@ class LocalProfileRepository {
       return {key:PROFILE_STORAGE_KEY,raw:currentRaw,source:'current'};
     }
 
-    const backupRaw=this.backupRaw();
-    if(currentRaw!==null&&backupRaw!==null){
-      this.set(PROFILE_STORAGE_KEY,backupRaw);
+    // 正式存檔遺失或損壞時，無論遷移標記是否存在，都優先救回最新可用備份。
+    const backupCandidates=[
+      {key:PROFILE_BACKUP_STORAGE_KEY,raw:this.get(PROFILE_BACKUP_STORAGE_KEY)},
+      ...LEGACY_PROFILE_BACKUP_STORAGE_KEYS.map(key=>({key,raw:this.get(key)}))
+    ];
+    for(const candidate of backupCandidates){
+      if(!parseProfileRaw(candidate.raw)) continue;
+      this.set(PROFILE_BACKUP_STORAGE_KEY,candidate.raw);
+      this.set(PROFILE_STORAGE_KEY,candidate.raw);
+      this.set(PROFILE_MIGRATION_MARKER_KEY,JSON.stringify({from:candidate.key,at:Date.now()}));
       this.lastStatus.restoredBackup=true;
       this.lastStatus.localStorage=this.readCurrent()!==null;
       this.lastStatus.backupAvailable=true;
-      return {key:PROFILE_STORAGE_KEY,raw:backupRaw,source:'backup'};
+      return {key:candidate.key,raw:candidate.raw,source:'backup'};
     }
 
-    if(!this.get(PROFILE_MIGRATION_MARKER_KEY)){
-      for(const key of LEGACY_PROFILE_STORAGE_KEYS){
-        const raw=this.get(key);
-        if(!parseProfileRaw(raw)) continue;
-        this.set(PROFILE_BACKUP_STORAGE_KEY,raw);
-        this.set(PROFILE_STORAGE_KEY,raw);
-        this.set(PROFILE_MIGRATION_MARKER_KEY,JSON.stringify({from:key,at:Date.now()}));
-        this.lastStatus.migrated=true;
-        this.lastStatus.localStorage=this.readCurrent()!==null;
-        this.lastStatus.backupAvailable=true;
-        return {key,raw,source:'migration'};
-      }
-      this.set(PROFILE_MIGRATION_MARKER_KEY,JSON.stringify({from:null,at:Date.now()}));
+    // 不再讓舊的「已遷移」標記阻止救援；只要找到舊版正式存檔就重新搬回來。
+    for(const key of LEGACY_PROFILE_STORAGE_KEYS){
+      const raw=this.get(key);
+      if(!parseProfileRaw(raw)) continue;
+      this.set(PROFILE_BACKUP_STORAGE_KEY,raw);
+      this.set(PROFILE_STORAGE_KEY,raw);
+      this.set(PROFILE_MIGRATION_MARKER_KEY,JSON.stringify({from:key,at:Date.now()}));
+      this.lastStatus.migrated=true;
+      this.lastStatus.localStorage=this.readCurrent()!==null;
+      this.lastStatus.backupAvailable=true;
+      return {key,raw,source:'migration'};
     }
+    this.set(PROFILE_MIGRATION_MARKER_KEY,JSON.stringify({from:null,at:Date.now()}));
 
     this.lastStatus.localStorage=false;
     this.lastStatus.backupAvailable=this.backupRaw()!==null;
@@ -4956,7 +4965,10 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){scheduleV
 addEventListener('load',tryFullscreenImmediately,{once:true});
 if(document.readyState==='complete')tryFullscreenImmediately();
 if(location.protocol==='https:'||location.protocol==='http:'){
-  navigator.serviceWorker?.register?.('./sw.js').catch(()=>{});
+  // 目前工程沒有 service worker。主動移除舊版本殘留，避免快取舊 HTML 或攔截 /health。
+  navigator.serviceWorker?.getRegistrations?.()
+    .then(registrations=>Promise.all(registrations.map(registration=>registration.unregister())))
+    .catch(()=>{});
 }
 syncFullscreenButton();
 
@@ -5452,9 +5464,26 @@ function createSeededRandom(seed){
   let value=(Number(seed)>>>0)||0x6d2b79f5;
   return ()=>{value=(value+0x6D2B79F5)>>>0;let t=value;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};
 }
-const ONLINE_CONNECT_TIMEOUT_MS=45000;
-const ONLINE_ROOM_ACK_TIMEOUT_MS=10000;
+const ONLINE_CONNECT_TIMEOUT_MS=60000;
+const ONLINE_ROOM_ACK_TIMEOUT_MS=12000;
+const ONLINE_RENDER_ORIGIN='https://ancient-chinese-warfare-td-game.onrender.com';
 let onlineHealthSequence=0;
+function onlineServerOrigin(){
+  try{
+    const override=new URLSearchParams(location.search).get('server');
+    if(override){
+      const parsed=new URL(override);
+      if(parsed.protocol==='http:'||parsed.protocol==='https:')return parsed.origin;
+    }
+  }catch{}
+  try{
+    if(['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname))return location.origin;
+    const renderHost=new URL(ONLINE_RENDER_ORIGIN).hostname;
+    if(location.hostname===renderHost)return location.origin;
+  }catch{}
+  return ONLINE_RENDER_ORIGIN;
+}
+function onlineHealthUrl(){return `${onlineServerOrigin()}/health?t=${Date.now()}`;}
 function setOnlineLobbyState(state,text){
   const button=$('#online-button'),label=$('#online-status-text');
   if(!button)return;
@@ -5472,18 +5501,12 @@ function setOnlineModalStatus(text,state='waiting'){
 }
 async function checkOnlineServer({interactive=false}={}){
   const sequence=++onlineHealthSequence;
-  const httpPage=location.protocol==='http:'||location.protocol==='https:';
-  if(!httpPage){
-    setOnlineLobbyState('waiting','本機連線待命');
-    setOnlineModalStatus('準備連接本機伺服器','waiting');
-    return {ok:true,local:true};
-  }
   setOnlineLobbyState('waking',interactive?'喚醒伺服器…':'檢查伺服器…');
   setOnlineModalStatus(interactive?'正在喚醒 Render 伺服器，休眠時可能稍等一下…':'正在檢查伺服器…','waking');
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),interactive?60000:8000);
   try{
-    const response=await fetch(`/health?t=${Date.now()}`,{cache:'no-store',signal:controller.signal});
+    const response=await fetch(onlineHealthUrl(),{cache:'no-store',mode:'cors',signal:controller.signal});
     if(!response.ok)throw new Error(`伺服器回應 ${response.status}`);
     const data=await response.json();
     if(sequence!==onlineHealthSequence)return data;
@@ -5492,17 +5515,19 @@ async function checkOnlineServer({interactive=false}={}){
     setOnlineModalStatus('伺服器在線，可以建立或加入房間','ready');
     return data;
   }catch(error){
+    // 健康檢查只負責顯示狀態，不能再阻擋真正的 WebSocket 房間連線。
+    if(onlineSession?.socket?.readyState===WebSocket.OPEN)return {ok:true,websocket:true};
     if(sequence===onlineHealthSequence){
-      const message=error?.name==='AbortError'?'伺服器喚醒逾時，請再按一次':'伺服器目前無法連線';
-      setOnlineLobbyState('offline','點擊重新連線');
+      const message=error?.name==='AbortError'?'伺服器喚醒逾時，仍可直接建立房間':'健康檢查失敗，仍可直接建立房間';
+      setOnlineLobbyState('offline','點擊直接連線');
       setOnlineModalStatus(message,'error');
     }
     throw error;
   }finally{clearTimeout(timeout);}
 }
 function defaultWebSocketUrl(){
-  if(location.protocol==='http:'||location.protocol==='https:')return `${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`;
-  return 'ws://127.0.0.1:8787/ws';
+  const origin=new URL(onlineServerOrigin());
+  return `${origin.protocol==='https:'?'wss':'ws'}://${origin.host}/ws`;
 }
 function setNetworkStatus(text,state=''){
   const badge=$('#network-status');
@@ -5961,11 +5986,12 @@ async function beginOnlineRoom(mode){
   $('#online-create').disabled=true;$('#online-join').disabled=true;
   setOnlineLobbyState('waking','正在連線…');setOnlineModalStatus('正在確認伺服器與房間…','waking');
   try{
-    await checkOnlineServer({interactive:true});
     onlineSession?.disconnect?.(true);
     const session=new OnlineSession(defaultWebSocketUrl());
     onlineSession=session;
-    await session.connect();
+    // 直接開 WebSocket；/health 失敗只影響燈號，不再卡住房間建立。
+    checkOnlineServer({interactive:true}).catch(()=>{});
+    await session.connect(ONLINE_CONNECT_TIMEOUT_MS);
     const info={name:profile.playerName||'玩家',loadout:normalizeHeroLoadout(selectedHeroIds)};
     await session.requestRoom(mode,code,info);
   }catch(error){
@@ -6093,7 +6119,7 @@ requestAnimationFrame(frame);
 <!-- v0.10.0：建立玩家一／玩家二角色、可交換的本機視角、房間 WebSocket 協定與伺服器時鐘操作骨架；本機玩家永遠顯示於下方。 -->
 <!-- v0.10.1：Render 同源 WSS 上線包、20 秒心跳、伺服器更新通知與連線按鈕復原。 -->
 <!-- v0.10.2：房間代號由玩家自訂；入口精簡為一個輸入框與建立／加入；列隊畫面新增雙方準備狀態及三秒倒數，本機玩家永遠在下方。 -->
-<!-- v0.10.3：延長 Render 休眠喚醒等待、增加房間建立回覆逾時與可見錯誤訊息；移除聯機視窗叉號，首頁聯機按鈕新增伺服器狀態燈。 -->
+<!-- v0.10.4：固定連向正式 Render 伺服器、WebSocket 不再被 /health 失敗阻擋、移除舊 service worker；強化正式存檔／備份／舊版存檔救援。 -->
 </body>
 </html>
 <!-- v0.8.27: replaced broken mantou and heart artwork with repaired transparent assets; save keys unchanged. -->

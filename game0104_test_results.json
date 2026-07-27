@@ -1,0 +1,76 @@
+{
+  "room": {
+    "a": {
+      "green": true,
+      "status": "房間已連線",
+      "room": "123"
+    },
+    "b": {
+      "green": true,
+      "status": "房間已連線",
+      "room": "123"
+    },
+    "sides": [
+      {
+        "local": "player",
+        "y": 455.2525,
+        "mid": 365.425
+      },
+      {
+        "local": "rival",
+        "y": 575.0225,
+        "mid": 365.425
+      }
+    ],
+    "errors": [
+      "A:CONSOLE:Failed to load resource: net::ERR_FAILED",
+      "A:CONSOLE:Failed to load resource: net::ERR_FAILED",
+      "B:CONSOLE:Failed to load resource: net::ERR_FAILED",
+      "B:CONSOLE:Failed to load resource: net::ERR_FAILED",
+      "A:CONSOLE:Failed to load resource: net::ERR_FAILED",
+      "B:CONSOLE:Failed to load resource: net::ERR_FAILED"
+    ]
+  },
+  "save": {
+    "persisted": {
+      "name": "持久存檔",
+      "hasCurrent": true
+    },
+    "backup": {
+      "name": "備份救援",
+      "coins": 321,
+      "hasCurrent": true,
+      "status": {
+        "localStorage": true,
+        "backupAvailable": true,
+        "migrated": false,
+        "restoredBackup": true,
+        "ignoredUrlBackup": false
+      }
+    },
+    "legacy": {
+      "name": "舊版救援",
+      "coins": 456,
+      "hasCurrent": true,
+      "status": {
+        "localStorage": true,
+        "backupAvailable": true,
+        "migrated": true,
+        "restoredBackup": false,
+        "ignoredUrlBackup": false
+      }
+    },
+    "oldBackup": {
+      "name": "舊備份救援",
+      "coins": 654,
+      "hasCurrent": true,
+      "status": {
+        "localStorage": true,
+        "backupAvailable": true,
+        "migrated": false,
+        "restoredBackup": true,
+        "ignoredUrlBackup": false
+      }
+    }
+  }
+}

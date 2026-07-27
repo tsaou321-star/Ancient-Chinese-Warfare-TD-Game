@@ -9,7 +9,7 @@ const os = require('node:os');
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
-const APP_VERSION = '0.10.3';
+const APP_VERSION = '0.10.4';
 const PROTOCOL_VERSION = 3;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
@@ -37,6 +37,8 @@ function sendHttp(res, status, body, type = 'text/plain; charset=utf-8') {
   res.writeHead(status, {
     'content-type': type,
     'cache-control': 'no-store',
+    'access-control-allow-origin': '*',
+    'cross-origin-resource-policy': 'cross-origin',
     'x-content-type-options': 'nosniff'
   });
   res.end(body);
@@ -433,6 +435,7 @@ function handleMessage(peer, message) {
     const room = new MatchRoom(code);
     rooms.set(code, room);
     room.attach(peer, 'player', message.player);
+    console.log(`[房間 ${code}] 已建立`);
     peer.send({ type: 'room_created', roomCode: code, sideId: 'player' });
     room.broadcastState();
     return;
@@ -446,6 +449,7 @@ function handleMessage(peer, message) {
     if (!room) return peer.send({ type: 'error', message: '找不到這個房間' });
     if (room.status !== 'waiting' || room.peers.rival) return peer.send({ type: 'error', message: '房間已滿或戰局已開始' });
     room.attach(peer, 'rival', message.player);
+    console.log(`[房間 ${code}] 對手已加入`);
     peer.send({ type: 'room_joined', roomCode: code, sideId: 'rival' });
     room.peers.player?.send({ type: 'peer_joined', roomCode: code });
     room.broadcastState();
