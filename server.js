@@ -9,8 +9,8 @@ const os = require('node:os');
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
-const APP_VERSION = '0.10.4';
-const PROTOCOL_VERSION = 3;
+const APP_VERSION = '0.10.7';
+const PROTOCOL_VERSION = 4;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
 const START_DELAY_MS = 3000;
@@ -365,10 +365,13 @@ function makeRoomCode() {
 
 function sanitizePlayer(player) {
   const name = String(player?.name || '玩家').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 16) || '玩家';
+  const rank = String(player?.rank || '士卒').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 12) || '士卒';
+  const rawHatId = typeof player?.hatId === 'string' ? player.hatId.trim() : '';
+  const hatId = /^[a-z0-9_-]{1,40}$/i.test(rawHatId) ? rawHatId : null;
   const loadout = Array.isArray(player?.loadout)
     ? player.loadout.map(value => String(value).slice(0, 40)).filter(Boolean).slice(0, 4)
     : [];
-  return { name, loadout };
+  return { name, rank, hatId, loadout };
 }
 
 function integer(value, min, max) {
@@ -469,6 +472,17 @@ function handleMessage(peer, message) {
     return;
   }
 
+  if (message.type === 'leave_room') {
+    if (!peer.room || !peer.sideId) {
+      peer.send({ type: 'room_left' });
+      return;
+    }
+    const roomCode = peer.room.code;
+    leaveRoom(peer, 'leave');
+    peer.send({ type: 'room_left', roomCode });
+    return;
+  }
+
   if (message.type === 'command') {
     if (!peer.room || !peer.sideId) return peer.send({ type: 'error', message: '尚未加入房間' });
     peer.room.acceptCommand(peer, message.command);
@@ -480,17 +494,64 @@ function handleMessage(peer, message) {
   }
 }
 
-function detachPeer(peer) {
-  peers.delete(peer);
+function clearPeerRoomState(peer) {
+  if (!peer) return;
+  peer.room = null;
+  peer.sideId = null;
+  peer.player = null;
+  peer.ready = false;
+}
+
+function leaveRoom(peer, reason = 'disconnect') {
   const room = peer.room;
-  if (!room) return;
-  const otherSide = peer.sideId === 'player' ? 'rival' : 'player';
-  room.peers[peer.sideId] = null;
-  room.ready[peer.sideId] = false;
-  room.peers[otherSide]?.send({ type: 'peer_left' });
+  const sideId = peer.sideId;
+  if (!room || !sideId) {
+    clearPeerRoomState(peer);
+    return;
+  }
+
+  const otherSide = sideId === 'player' ? 'rival' : 'player';
+  const otherPeer = room.peers[otherSide];
+  room.peers[sideId] = null;
+  room.players[sideId] = null;
+  room.ready[sideId] = false;
+  clearPeerRoomState(peer);
+
+  if (room.status === 'closed') return;
+
+  if (room.status === 'waiting' && sideId === 'rival' && room.peers.player) {
+    room.ready.player = false;
+    room.peers.player.ready = false;
+    room.peers.player.send({
+      type: 'peer_left',
+      roomCode: room.code,
+      message: reason === 'leave' ? '對手已退出房間，可以繼續等待' : '對手已離線，可以繼續等待'
+    });
+    room.broadcastState();
+    console.log(`[房間 ${room.code}] 加入者已離開，房主繼續等待`);
+    return;
+  }
+
+  if (otherPeer) {
+    room.peers[otherSide] = null;
+    room.players[otherSide] = null;
+    room.ready[otherSide] = false;
+    clearPeerRoomState(otherPeer);
+    otherPeer.send({
+      type: 'room_closed',
+      roomCode: room.code,
+      message: room.status === 'waiting' ? '房主已退出房間' : '對手已退出，聯機戰局已結束'
+    });
+  }
+
   room.stop();
   rooms.delete(room.code);
-  peer.room = null;
+  console.log(`[房間 ${room.code}] 已關閉`);
+}
+
+function detachPeer(peer) {
+  peers.delete(peer);
+  leaveRoom(peer, 'disconnect');
 }
 
 function lanAddresses() {
