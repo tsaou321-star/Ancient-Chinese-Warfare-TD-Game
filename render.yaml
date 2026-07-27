@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: save-the-lord-online
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    maxShutdownDelaySeconds: 30
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
