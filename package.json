@@ -1,8 +1,8 @@
 {
   "name": "save-the-lord-online",
-  "version": "0.10.1",
+  "version": "0.10.3",
   "private": true,
-  "description": "還不快救主！Render WebSocket 聯機測試伺服器",
+  "description": "還不快救主！房間連線修正版聯機伺服器",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -9,9 +9,11 @@ const os = require('node:os');
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
+const APP_VERSION = '0.10.3';
+const PROTOCOL_VERSION = 3;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
-const START_DELAY_MS = 1200;
+const START_DELAY_MS = 3000;
 const MAX_MESSAGE_BYTES = 64 * 1024;
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const VALID_COMMANDS = new Set(['recruit', 'drop', 'dropToBench', 'activeSkill', 'surrender']);
@@ -48,7 +50,7 @@ const server = http.createServer((req, res) => {
 
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   if (url.pathname === '/health') {
-    sendHttp(res, 200, JSON.stringify({ ok: true, rooms: rooms.size, tickRate: TICK_RATE }), 'application/json; charset=utf-8');
+    sendHttp(res, 200, JSON.stringify({ ok: true, version: APP_VERSION, protocolVersion: PROTOCOL_VERSION, rooms: rooms.size, tickRate: TICK_RATE }), 'application/json; charset=utf-8');
     return;
   }
 
@@ -268,6 +270,16 @@ class MatchRoom {
     this.peers.rival?.send(message);
   }
 
+  broadcastState() {
+    this.broadcast({
+      type: 'room_state',
+      roomCode: this.code,
+      players: this.players,
+      ready: this.ready,
+      status: this.status
+    });
+  }
+
   attach(peer, sideId, player) {
     this.peers[sideId] = peer;
     this.players[sideId] = sanitizePlayer(player);
@@ -282,12 +294,15 @@ class MatchRoom {
     this.status = 'starting';
     const seed = crypto.randomBytes(4).readUInt32BE(0);
     this.seed = seed;
+    const startsAt = Date.now() + START_DELAY_MS;
+    this.broadcastState();
     this.broadcast({
       type: 'match_start',
       roomCode: this.code,
       seed,
       tickRate: TICK_RATE,
       startDelayMs: START_DELAY_MS,
+      startsAt,
       players: this.players
     });
     this.startTimer = setTimeout(() => this.startClock(), START_DELAY_MS);
@@ -399,7 +414,12 @@ function sanitizeCommand(command, assignedSideId) {
 }
 
 function normalizeRoomCode(value) {
-  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+}
+
+
+function validRoomCode(value) {
+  return /^[A-Z0-9]{1,8}$/.test(value);
 }
 
 function handleMessage(peer, message) {
@@ -407,32 +427,40 @@ function handleMessage(peer, message) {
 
   if (message.type === 'create_room') {
     if (peer.room) return peer.send({ type: 'error', message: '你已經在房間中' });
-    const code = makeRoomCode();
+    const code = normalizeRoomCode(message.roomCode);
+    if (!validRoomCode(code)) return peer.send({ type: 'error', message: '請輸入 1～8 位英文字母或數字' });
+    if (rooms.has(code)) return peer.send({ type: 'error', message: '這個房間代號已被使用' });
     const room = new MatchRoom(code);
     rooms.set(code, room);
     room.attach(peer, 'player', message.player);
     peer.send({ type: 'room_created', roomCode: code, sideId: 'player' });
+    room.broadcastState();
     return;
   }
 
   if (message.type === 'join_room') {
     if (peer.room) return peer.send({ type: 'error', message: '你已經在房間中' });
     const code = normalizeRoomCode(message.roomCode);
+    if (!validRoomCode(code)) return peer.send({ type: 'error', message: '請輸入 1～8 位英文字母或數字' });
     const room = rooms.get(code);
     if (!room) return peer.send({ type: 'error', message: '找不到這個房間' });
     if (room.status !== 'waiting' || room.peers.rival) return peer.send({ type: 'error', message: '房間已滿或戰局已開始' });
     room.attach(peer, 'rival', message.player);
     peer.send({ type: 'room_joined', roomCode: code, sideId: 'rival' });
     room.peers.player?.send({ type: 'peer_joined', roomCode: code });
+    room.broadcastState();
     return;
   }
 
-  if (message.type === 'ready') {
+  if (message.type === 'ready' || message.type === 'set_ready') {
     if (!peer.room || !peer.sideId) return peer.send({ type: 'error', message: '尚未加入房間' });
+    if (peer.room.status !== 'waiting') return peer.send({ type: 'error', message: '戰局已經開始倒數' });
     peer.player = sanitizePlayer(message.player || peer.player);
     peer.room.players[peer.sideId] = peer.player;
-    peer.ready = true;
-    peer.room.ready[peer.sideId] = true;
+    const isReady = message.type === 'ready' ? true : Boolean(message.ready);
+    peer.ready = isReady;
+    peer.room.ready[peer.sideId] = isReady;
+    peer.room.broadcastState();
     peer.room.maybeStart();
     return;
   }

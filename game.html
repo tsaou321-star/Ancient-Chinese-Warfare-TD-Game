@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>還不快救主！・v0.10.1 Render 線上對戰測試版</title>
+<title>還不快救主！・v0.10.3 房間連線修正版</title>
 <meta name="theme-color" content="#eadfce">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
 .loadout-summary{position:absolute;left:5%;right:5%;bottom:162px;display:flex;flex-direction:column;gap:3px;padding:7px 10px;background:#fff7e4d9;border:2px solid #725644;border-radius:8px}.loadout-summary small{font-size:12px;color:#6c4e3d}.loadout-summary b{font-size:15px;color:#7c3429;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#start-button:disabled,.confirm-loadout:disabled{filter:grayscale(.8);opacity:.55;box-shadow:none}.bag{border:0;background:transparent;color:var(--ink);padding:0;line-height:1;cursor:pointer}.bag:active{transform:translateY(2px)}.hero-bag-panel{max-width:400px;max-height:88%;overflow:auto;touch-action:pan-y;padding:16px 14px 14px}.hero-bag-panel h2{text-align:center;margin:0 0 4px;color:#8d392d}.bag-hint{margin:0 30px 10px;text-align:center;font-size:13px;color:#654b3e}.selected-hero-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.selected-slot{min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #8f7b68;background:#dfd1bb;color:#78685b;border-radius:6px}.selected-slot.filled{border-style:solid;border-color:#8c4b39;background:#fff6e5;color:#6f2f25}.selected-slot span{font:900 10px sans-serif;opacity:.7}.selected-slot b{font-size:16px}.bag-message{min-height:25px;padding:5px;text-align:center;color:#8b3d2f;font-size:13px;font-weight:900}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.hero-card{position:relative;min-height:105px;border:2px solid #735b49;border-radius:7px;background:#fff8e8;color:#30231c;padding:8px 7px;text-align:left;cursor:pointer}.hero-card.selected{border:3px solid #c7782e;background:#f7dfb0}.hero-card b{display:block;text-align:center;font-size:20px;color:#78372b}.hero-card em{display:block;text-align:center;font-style:normal;font-size:16px;font-weight:900;letter-spacing:4px}.hero-card small{display:block;margin-top:5px;font-size:11px;line-height:1.3;color:#5d4a3d}.hero-order{position:absolute;left:4px;top:4px;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#9f4c39;color:white;font:900 12px sans-serif}.hero-card:not(.selected) .hero-order{display:none}.confirm-loadout{display:block;width:180px;height:44px;margin:12px auto 0;border:2px solid #2b211a;border-radius:7px;background:#a64b37;color:#fff;font-size:18px;font-weight:900;box-shadow:0 4px 0 #633024}.fighter span{max-width:90%;text-align:center;line-height:1.4}
 
 /* v0.4.1 lobby profile and mode selection */
-.top-meta{justify-content:flex-start;align-items:center}.top-meta #lobby-coins{display:inline-flex;align-items:center;min-width:92px;padding:6px 12px;border:2px solid #6c5039;border-radius:18px;background:#fff5d9d9;color:#5d3b20;font:900 16px sans-serif;box-shadow:0 2px 0 #94775a}.loadout-summary{bottom:215px}#start-button{bottom:145px;left:20%;width:60%}#online-button{position:absolute;bottom:80px;left:20%;width:60%;height:50px;border:3px solid #51483f;background:#77716b;color:#f4eee5;border-radius:7px;font-size:20px;font-weight:900;box-shadow:none;opacity:.72}#online-button small{display:block;font-size:11px;margin-top:1px}#online-button:disabled{cursor:not-allowed;filter:grayscale(.45)}.bag{bottom:14px;right:20px}.victory-panel button:disabled{opacity:.65;box-shadow:none}
+.top-meta{justify-content:flex-start;align-items:center}.top-meta #lobby-coins{display:inline-flex;align-items:center;min-width:92px;padding:6px 12px;border:2px solid #6c5039;border-radius:18px;background:#fff5d9d9;color:#5d3b20;font:900 16px sans-serif;box-shadow:0 2px 0 #94775a}.loadout-summary{bottom:215px}#start-button{bottom:145px;left:20%;width:60%}#online-button{position:absolute;bottom:80px;left:20%;width:60%;height:50px;border:3px solid #493126;background:#8e4637;color:#fff8e8;border-radius:7px;font-size:20px;font-weight:900;box-shadow:0 5px 0 #5d2d23;opacity:1;transition:filter .18s,box-shadow .18s,border-color .18s,background .18s}#online-button small{display:flex;align-items:center;justify-content:center;gap:6px;font:900 11px/1.1 sans-serif;margin-top:2px}#online-button .online-status-light{width:9px;height:9px;border-radius:50%;background:#d1a13b;box-shadow:0 0 7px #d1a13b;flex:0 0 auto}#online-button.server-ready{border-color:#315c43;background:#854536;box-shadow:0 5px 0 #553126,0 0 15px rgba(73,184,105,.58)}#online-button.server-ready .online-status-light{background:#4fbd73;box-shadow:0 0 11px #4fbd73}#online-button.server-waking .online-status-light{background:#e4a72e;box-shadow:0 0 10px #e4a72e;animation:online-light-pulse .85s ease-in-out infinite alternate}#online-button.server-offline{border-color:#71372f;background:#75453e;box-shadow:0 4px 0 #4e2924}#online-button.server-offline .online-status-light{background:#d05c50;box-shadow:0 0 8px #d05c50}#online-button:disabled{cursor:not-allowed;filter:grayscale(.45);opacity:.68;box-shadow:none}@keyframes online-light-pulse{from{opacity:.45;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}.bag{bottom:14px;right:20px}.victory-panel button:disabled{opacity:.65;box-shadow:none}
 
 /* v0.4.2 player identity, hero unlocks and wave rewards */
 .top-meta{gap:8px;flex-wrap:wrap;padding-right:10px}
@@ -1189,10 +1189,21 @@ html.installed-app-mode #fullscreen-toggle{display:none!important}
 .active-skill-slot.skill-ready:active{cursor:grabbing!important}
 @media(max-width:360px){.hero-token-grid{gap:4px}.hero-token .token-count{font-size:10px}.hero-token .token-used-mark{font-size:35px}}
 
-/* v0.10.0：聯機工程入口、連線狀態與房間面板。 */
+/* v0.10.2：簡易房間入口、列隊準備與三秒倒數。 */
 .network-status{position:absolute;z-index:105;left:10px;top:10px;padding:5px 9px;border:1px solid rgba(61,43,32,.55);border-radius:999px;background:rgba(255,248,232,.88);color:#51372b;font:900 12px/1.2 sans-serif;pointer-events:none}
 .network-status.connected{background:rgba(220,243,229,.92);color:#275842}.network-status.waiting{background:rgba(255,239,194,.94);color:#76511f}.network-status.error{background:rgba(250,220,214,.94);color:#8a3027}
-.online-panel{width:min(92vw,390px);padding:20px 17px 17px;text-align:left}.online-panel h2{text-align:center;margin:0 0 8px;color:#8d392d}.online-note{font-size:13px;line-height:1.55;color:#634b3e;margin:0 0 10px}.online-connection-state{padding:9px 10px;margin-bottom:10px;border:1px solid #9d8974;border-radius:7px;background:#fff8e8;color:#6c4938;font-weight:900;text-align:center}.online-field{display:block;margin:9px 0;color:#5b4033;font-size:13px;font-weight:900}.online-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px 11px;border:2px solid #80674d;border-radius:7px;background:#fffdf7;color:#2d211b;font-size:16px}.online-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.online-actions button,.mirror-test-button{min-height:44px;border:2px solid #38271e;border-radius:7px;font-size:16px;font-weight:900}.online-actions button{background:#a64b37;color:#fff8e8}.mirror-test-button{width:100%;margin-top:10px;background:#fff5dd;color:#6d3d2f}.online-footnote{display:block;margin-top:11px;color:#735d50;line-height:1.45}.online-panel button:disabled{opacity:.52;filter:grayscale(.5)}
+.online-panel{width:min(88vw,350px);padding:24px 18px 20px;text-align:center}.online-panel h2{margin:0 0 9px;color:#8d392d}.online-modal-status{min-height:22px;margin:0 0 12px;color:#6e4f3f;font:900 13px/1.3 sans-serif}.online-modal-status[data-state=ready],.online-modal-status[data-state=connected]{color:#2c6747}.online-modal-status[data-state=waking],.online-modal-status[data-state=waiting]{color:#8a5b19}.online-modal-status[data-state=error]{color:#9a332a}.online-field{display:block;margin:0}.online-field input{display:block;width:100%;box-sizing:border-box;padding:13px 12px;border:2px solid #80674d;border-radius:7px;background:#fffdf7;color:#2d211b;font-size:18px;text-align:center;text-transform:uppercase;letter-spacing:2px;font-weight:900}.online-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.online-actions button{min-height:48px;border:2px solid #38271e;border-radius:7px;background:#a64b37;color:#fff8e8;font-size:17px;font-weight:900}.online-panel button:disabled{opacity:.52;filter:grayscale(.5)}
+#match-screen .match-room-code{position:absolute;top:15.5%;left:50%;transform:translateX(-50%);padding:5px 13px;border:2px solid #735442;border-radius:999px;background:#fff4d9dc;color:#6b4330;font:900 14px/1.1 sans-serif;letter-spacing:1px;display:none}
+#match-screen.online-waiting .match-room-code{display:block}
+#match-screen .match-ready-state{display:none;margin-top:8px;padding:4px 11px;border:1px solid #7d6758;border-radius:999px;background:#fff6dfcc;color:#6d4f3f;font:900 13px/1.1 sans-serif}
+#match-screen.online-waiting .match-ready-state{display:inline-block}
+#match-screen .match-ready-state.ready{background:#dcefdccb;color:#285a3f;border-color:#5c806a}
+#online-ready-button{display:none;position:absolute;z-index:5;left:23%;bottom:3.5%;width:54%;height:50px;border:3px solid #39261d;border-radius:8px;background:#a64b37;color:#fff8e8;font-size:21px;font-weight:900;box-shadow:0 5px 0 #633024}
+#match-screen.online-waiting #online-ready-button{display:block}
+#online-ready-button.ready{background:#6c786d;box-shadow:0 5px 0 #465148}
+#online-ready-button:disabled{opacity:.58;box-shadow:none}
+#match-screen.online-countdown .match-title{font-size:52px;top:14%;color:#9c3022;text-shadow:0 2px #fff3dc}
+#match-screen.online-waiting .fighter.blue b::after,#match-screen.online-countdown .fighter.blue b::after{display:none}
 </style>
 </head>
 <body>
@@ -1217,23 +1228,27 @@ html.installed-app-mode #fullscreen-toggle{display:none!important}
     </div>
     <div id="loadout-summary" class="loadout-summary"></div>
     <button id="start-button" type="button">單機模式</button>
-    <button id="online-button" type="button">線上對戰<small>建立／加入房間</small></button>
+    <button id="online-button" class="server-waking" type="button">線上對戰<small><i class="online-status-light" aria-hidden="true"></i><span id="online-status-text">檢查伺服器…</span></small></button>
     <button id="hero-bag" class="bag" type="button">🎒<small>武將背包</small></button>
   </section>
 
   <section id="match-screen" class="screen">
     <div class="match-title">列隊等待</div>
+    <div id="match-room-code" class="match-room-code">房間</div>
     <div class="fighter blue">
-      <b id="match-rival-name">王侯將相</b>
-      <small class="match-rank-line">軍階　<strong id="match-rival-rank">大將軍</strong></small>
-      <span id="rival-loadout-text">武將陣容已隱藏</span>
+      <b id="match-rival-name">等待對手</b>
+      <small class="match-rank-line">軍階　<strong id="match-rival-rank">等待中</strong></small>
+      <span id="rival-loadout-text">尚未加入</span>
+      <small id="rival-ready-state" class="match-ready-state">尚未準備</small>
     </div>
     <div class="cross">⚔</div>
     <div class="fighter red">
       <b id="match-player-name">玩家</b>
       <small class="match-rank-line">軍階　<strong id="match-player-rank">士卒</strong></small>
       <span id="player-loadout-text">武將準備中</span>
+      <small id="player-ready-state" class="match-ready-state">尚未準備</small>
     </div>
+    <button id="online-ready-button" type="button" disabled>等待對手</button>
   </section>
 
   <section id="battle-screen" class="screen">
@@ -1271,22 +1286,15 @@ html.installed-app-mode #fullscreen-toggle{display:none!important}
 
   <div id="online-modal" class="modal" aria-hidden="true">
     <div class="panel online-panel">
-      <button class="close" type="button" data-close>×</button>
-      <h2>線上對戰測試</h2>
-      <p class="online-note">兩台手機開啟同一個 Render 遊戲網址。建立者是玩家一，加入者是玩家二；雙方都會把自己顯示在下方。</p>
-      <div id="online-connection-state" class="online-connection-state">尚未連線</div>
-      <label class="online-field">伺服器
-        <input id="online-server-url" type="text" autocomplete="off" spellcheck="false" placeholder="自動使用目前 Render 網址">
-      </label>
-      <label class="online-field">房間代碼
-        <input id="online-room-code" type="text" inputmode="text" maxlength="6" autocomplete="off" spellcheck="false" placeholder="例如 A7K9Q2">
+      <h2>線上對戰</h2>
+      <div id="online-modal-status" class="online-modal-status" data-state="waiting" aria-live="polite">正在檢查伺服器…</div>
+      <label class="online-field">
+        <input id="online-room-code" type="text" inputmode="text" maxlength="8" autocomplete="off" spellcheck="false" aria-label="房間代號" placeholder="輸入房間代號">
       </label>
       <div class="online-actions">
         <button id="online-create" type="button">建立房間</button>
         <button id="online-join" type="button">加入房間</button>
       </div>
-      <button id="mirror-test-button" class="mirror-test-button" type="button">本機測試玩家二鏡像畫面</button>
-      <small class="online-footnote">本版可在 Render 建立／加入房間並同步操作；目前仍是同步模擬測試，下一階段會把傷害、資源與勝負改由伺服器權威判定。</small>
     </div>
   </div>
 
@@ -5444,93 +5452,152 @@ function createSeededRandom(seed){
   let value=(Number(seed)>>>0)||0x6d2b79f5;
   return ()=>{value=(value+0x6D2B79F5)>>>0;let t=value;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};
 }
+const ONLINE_CONNECT_TIMEOUT_MS=45000;
+const ONLINE_ROOM_ACK_TIMEOUT_MS=10000;
+let onlineHealthSequence=0;
+function setOnlineLobbyState(state,text){
+  const button=$('#online-button'),label=$('#online-status-text');
+  if(!button)return;
+  button.classList.remove('server-ready','server-waking','server-offline');
+  if(state==='ready'||state==='connected')button.classList.add('server-ready');
+  else if(state==='waking'||state==='waiting')button.classList.add('server-waking');
+  else if(state==='offline'||state==='error')button.classList.add('server-offline');
+  if(label)label.textContent=text||({ready:'伺服器在線',connected:'已連線',waking:'喚醒伺服器…',offline:'伺服器離線'}[state]||'建立／加入房間');
+}
+function setOnlineModalStatus(text,state='waiting'){
+  const panel=$('#online-modal-status');
+  if(!panel)return;
+  panel.textContent=text||'';
+  panel.dataset.state=state||'';
+}
+async function checkOnlineServer({interactive=false}={}){
+  const sequence=++onlineHealthSequence;
+  const httpPage=location.protocol==='http:'||location.protocol==='https:';
+  if(!httpPage){
+    setOnlineLobbyState('waiting','本機連線待命');
+    setOnlineModalStatus('準備連接本機伺服器','waiting');
+    return {ok:true,local:true};
+  }
+  setOnlineLobbyState('waking',interactive?'喚醒伺服器…':'檢查伺服器…');
+  setOnlineModalStatus(interactive?'正在喚醒 Render 伺服器，休眠時可能稍等一下…':'正在檢查伺服器…','waking');
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),interactive?60000:8000);
+  try{
+    const response=await fetch(`/health?t=${Date.now()}`,{cache:'no-store',signal:controller.signal});
+    if(!response.ok)throw new Error(`伺服器回應 ${response.status}`);
+    const data=await response.json();
+    if(sequence!==onlineHealthSequence)return data;
+    if(data?.protocolVersion&&Number(data.protocolVersion)!==3)throw new Error('Render 尚未更新到目前聯機版本');
+    setOnlineLobbyState('ready','伺服器在線');
+    setOnlineModalStatus('伺服器在線，可以建立或加入房間','ready');
+    return data;
+  }catch(error){
+    if(sequence===onlineHealthSequence){
+      const message=error?.name==='AbortError'?'伺服器喚醒逾時，請再按一次':'伺服器目前無法連線';
+      setOnlineLobbyState('offline','點擊重新連線');
+      setOnlineModalStatus(message,'error');
+    }
+    throw error;
+  }finally{clearTimeout(timeout);}
+}
 function defaultWebSocketUrl(){
   if(location.protocol==='http:'||location.protocol==='https:')return `${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`;
   return 'ws://127.0.0.1:8787/ws';
 }
 function setNetworkStatus(text,state=''){
-  const badge=$('#network-status');if(!badge)return;
-  badge.hidden=!text;badge.textContent=text;badge.className=`network-status ${state}`.trim();
-  const panel=$('#online-connection-state');if(panel)panel.textContent=text||'尚未連線';
+  const badge=$('#network-status');
+  if(badge){badge.hidden=!text;badge.textContent=text;badge.className=`network-status ${state}`.trim();}
+  if(text)setOnlineModalStatus(text,state||'waiting');
 }
 class OnlineSession {
-  constructor(url){this.url=url;this.socket=null;this.sideId=null;this.roomCode='';this.commandQueue=new Map();this.tick=0;this.started=false;this.playerInfo=null;this.pendingResolve=null;this.heartbeatTimer=null;this.lastPongAt=0;}
-  connect(){
+  constructor(url){this.url=url;this.socket=null;this.sideId=null;this.roomCode='';this.commandQueue=new Map();this.tick=0;this.started=false;this.playerInfo=null;this.players={};this.readyState={player:false,rival:false};this.localReady=false;this.countdownTimer=null;this.heartbeatTimer=null;this.lastPongAt=0;this.pendingRoomRequest=null;this.intentionalClose=false;}
+  connect(timeoutMs=ONLINE_CONNECT_TIMEOUT_MS){
     return new Promise((resolve,reject)=>{
       let settled=false;
+      this.intentionalClose=false;
       try{this.socket=new WebSocket(this.url);}catch(error){reject(error);return;}
-      const timeout=setTimeout(()=>{if(!settled){settled=true;reject(new Error('連線逾時'));try{this.socket.close();}catch{}}},6000);
-      this.socket.addEventListener('open',()=>{if(settled)return;settled=true;clearTimeout(timeout);this.lastPongAt=Date.now();this.startHeartbeat();setNetworkStatus('伺服器已連線','connected');resolve();});
-      this.socket.addEventListener('error',()=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error('無法連到伺服器'));}setNetworkStatus('連線錯誤','error');});
-      this.socket.addEventListener('close',()=>{this.stopHeartbeat();$('#online-create').disabled=false;$('#online-join').disabled=false;setNetworkStatus(this.started?'對手或伺服器已離線':'已離線','error');});
+      const timeout=setTimeout(()=>{if(!settled){settled=true;reject(new Error('伺服器連線逾時'));try{this.socket.close();}catch{}}},timeoutMs);
+      this.socket.addEventListener('open',()=>{if(settled)return;settled=true;clearTimeout(timeout);this.lastPongAt=Date.now();this.startHeartbeat();setNetworkStatus('伺服器已連線','connected');setOnlineLobbyState('connected','伺服器已連線');resolve();});
+      this.socket.addEventListener('error',()=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error('無法連到房間伺服器'));}if(!this.intentionalClose){setNetworkStatus('連線錯誤','error');setOnlineLobbyState('error','連線失敗');}});
+      this.socket.addEventListener('close',()=>{this.stopHeartbeat();this.rejectRoomRequest(new Error('連線已中斷'));$('#online-create').disabled=false;$('#online-join').disabled=false;if(!this.intentionalClose){setNetworkStatus(this.started?'對手或伺服器已離線':'已離線','error');setOnlineLobbyState('offline','點擊重新連線');}});
       this.socket.addEventListener('message',event=>this.handleMessage(event.data));
     });
   }
   send(payload){if(this.socket?.readyState===WebSocket.OPEN)this.socket.send(JSON.stringify(payload));}
-  startHeartbeat(){
-    this.stopHeartbeat();
-    this.heartbeatTimer=setInterval(()=>{
-      if(this.socket?.readyState!==WebSocket.OPEN)return;
-      if(this.lastPongAt&&Date.now()-this.lastPongAt>65000){try{this.socket.close();}catch{}return;}
-      this.send({type:'ping',now:Date.now()});
-    },20000);
+  requestRoom(mode,code,info){
+    if(this.socket?.readyState!==WebSocket.OPEN)return Promise.reject(new Error('伺服器尚未連線'));
+    this.playerInfo=info;
+    this.rejectRoomRequest(new Error('已取消上一個房間請求'));
+    return new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>{if(this.pendingRoomRequest?.reject===reject){this.pendingRoomRequest=null;reject(new Error('建立房間逾時，請再試一次'));}},ONLINE_ROOM_ACK_TIMEOUT_MS);
+      this.pendingRoomRequest={resolve,reject,timer,mode};
+      this.send({type:mode==='create'?'create_room':'join_room',roomCode:String(code||'').trim().toUpperCase(),player:info});
+    });
   }
+  resolveRoomRequest(message){const pending=this.pendingRoomRequest;if(!pending)return;clearTimeout(pending.timer);this.pendingRoomRequest=null;pending.resolve(message);}
+  rejectRoomRequest(error){const pending=this.pendingRoomRequest;if(!pending)return;clearTimeout(pending.timer);this.pendingRoomRequest=null;pending.reject(error instanceof Error?error:new Error(String(error||'房間請求失敗')));}
+  createRoom(code,info){return this.requestRoom('create',code,info);}
+  joinRoom(code,info){return this.requestRoom('join',code,info);}
+  setReady(ready){if(!this.sideId||this.started)return;this.localReady=Boolean(ready);this.send({type:'set_ready',ready:this.localReady,player:this.playerInfo});}
+  sendCommand(command){if(!this.started)return {ok:false,reason:'尚未進入聯機戰局'};this.send({type:'command',command});return {ok:true,pending:true,action:'network'};}
+  startHeartbeat(){this.stopHeartbeat();this.heartbeatTimer=setInterval(()=>{if(this.socket?.readyState!==WebSocket.OPEN)return;if(this.lastPongAt&&Date.now()-this.lastPongAt>65000){try{this.socket.close();}catch{}return;}this.send({type:'ping',now:Date.now()});},20000);}
   stopHeartbeat(){if(this.heartbeatTimer)clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;}
-  createRoom(info){this.playerInfo=info;this.send({type:'create_room',player:info});}
-  joinRoom(code,info){this.playerInfo=info;this.send({type:'join_room',roomCode:String(code||'').trim().toUpperCase(),player:info});}
-  sendCommand(command){
-    if(!this.started)return {ok:false,reason:'尚未進入聯機戰局'};
-    this.send({type:'command',command});
-    return {ok:true,pending:true,action:'network'};
+  queueCommand(message){const tick=Math.max(this.tick+1,Number(message.applyTick)||this.tick+1),list=this.commandQueue.get(tick)??[];list.push(message);list.sort((a,b)=>(a.sequence??0)-(b.sequence??0));this.commandQueue.set(tick,list);}
+  applyTick(tick){if(!this.started||!engine)return;const target=Math.max(this.tick,Number(tick)||0);while(this.tick<target&&this.tick<target+5){this.tick++;const commands=this.commandQueue.get(this.tick)??[];this.commandQueue.delete(this.tick);for(const message of commands){const result=applyGameCommand(message.command);if(message.command.sideId===engine.localSideId&&result&&!result.ok)toast(result.reason);}if(!engine.state.finished){engine.update(1/30);updateActiveSkillCooldowns(1/30);}}}
+  showWaitingRoom(){
+    const localInfo=this.players[this.sideId]??this.playerInfo??{},remoteId=this.sideId==='player'?'rival':'player',remoteInfo=this.players[remoteId]??null;
+    const localLoadout=normalizeHeroLoadout(localInfo.loadout,selectedHeroIds);
+    $('#match-screen').classList.remove('online-countdown');$('#match-screen').classList.add('online-waiting');
+    $('#match-screen .match-title').textContent='列隊等待';$('#match-room-code').textContent=`房間 ${this.roomCode}`;
+    $('#match-player-name').textContent=localInfo.name||profile.playerName||'玩家';$('#match-player-rank').textContent=playerRankProgress(profile.playerExperience).rank.name;
+    $('#player-loadout-text').textContent=heroNames(localLoadout).join('・');
+    $('#match-rival-name').textContent=remoteInfo?.name||'等待對手';$('#match-rival-rank').textContent=remoteInfo?'真人':'等待中';
+    $('#rival-loadout-text').textContent=remoteInfo?heroNames(normalizeHeroLoadout(remoteInfo.loadout,DEFAULT_RIVAL_LOADOUT)).join('・'):'尚未加入';
+    const localReady=Boolean(this.readyState[this.sideId]),remoteReady=Boolean(this.readyState[remoteId]);
+    const localState=$('#player-ready-state'),remoteState=$('#rival-ready-state');
+    localState.textContent=localReady?'已準備':'尚未準備';localState.classList.toggle('ready',localReady);
+    remoteState.textContent=remoteInfo?(remoteReady?'已準備':'尚未準備'):'等待加入';remoteState.classList.toggle('ready',remoteReady);
+    const readyButton=$('#online-ready-button');readyButton.disabled=!remoteInfo;readyButton.classList.toggle('ready',localReady);readyButton.textContent=!remoteInfo?'等待對手':localReady?'取消準備':'準備';
+    document.querySelectorAll('.modal.visible').forEach(modal=>{modal.classList.remove('visible');modal.setAttribute('aria-hidden','true');});
+    showScreen('#match-screen');setNetworkStatus(`房間 ${this.roomCode}・${remoteInfo?'等待準備':'等待對手'}`,'waiting');setOnlineLobbyState('connected','房間已連線');
   }
-  queueCommand(message){
-    const tick=Math.max(this.tick+1,Number(message.applyTick)||this.tick+1),list=this.commandQueue.get(tick)??[];
-    list.push(message);list.sort((a,b)=>(a.sequence??0)-(b.sequence??0));this.commandQueue.set(tick,list);
-  }
-  applyTick(tick){
-    if(!this.started||!engine)return;
-    const target=Math.max(this.tick,Number(tick)||0);
-    while(this.tick<target&&this.tick<target+5){
-      this.tick++;
-      const commands=this.commandQueue.get(this.tick)??[];
-      this.commandQueue.delete(this.tick);
-      for(const message of commands){const result=applyGameCommand(message.command);if(message.command.sideId===engine.localSideId&&result&&!result.ok)toast(result.reason);}
-      if(!engine.state.finished){engine.update(1/30);updateActiveSkillCooldowns(1/30);}
-    }
-  }
+  handleRoomState(message){this.players=message.players??this.players;this.readyState=message.ready??this.readyState;this.localReady=Boolean(this.readyState[this.sideId]);this.showWaitingRoom();}
   handleMessage(raw){
     let message;try{message=JSON.parse(raw);}catch{return;}
     if(message.type==='room_created'||message.type==='room_joined'){
-      this.sideId=message.sideId;this.roomCode=message.roomCode;
-      $('#online-room-code').value=this.roomCode;
-      setNetworkStatus(`房間 ${this.roomCode}・等待對手`,'waiting');
-      this.send({type:'ready',player:this.playerInfo});
-      return;
+      this.sideId=message.sideId;this.roomCode=message.roomCode;this.players[this.sideId]=this.playerInfo;this.readyState={player:false,rival:false};this.localReady=false;
+      $('#online-room-code').value=this.roomCode;this.showWaitingRoom();this.resolveRoomRequest(message);return;
     }
+    if(message.type==='room_state'){this.handleRoomState(message);return;}
     if(message.type==='peer_joined'){setNetworkStatus(`房間 ${message.roomCode}・對手已加入`,'waiting');return;}
     if(message.type==='match_start'){this.startMatch(message);return;}
     if(message.type==='command'){this.queueCommand(message);return;}
     if(message.type==='tick'){this.applyTick(message.tick);return;}
-    if(message.type==='peer_left'){setNetworkStatus('對手已離線','error');toast('對手離線，聯機戰局停止');return;}
+    if(message.type==='peer_left'){setNetworkStatus('對手已離線','error');toast('對手離線，聯機戰局停止');$('#online-ready-button').disabled=true;$('#online-ready-button').textContent='對手已離線';return;}
     if(message.type==='pong'){this.lastPongAt=Date.now();return;}
     if(message.type==='server_shutdown'){setNetworkStatus('伺服器更新中，請稍後重連','error');toast('伺服器正在更新，這場測試已中止');return;}
-    if(message.type==='error'){setNetworkStatus(message.message||'伺服器錯誤','error');toast(message.message||'伺服器錯誤');}
+    if(message.type==='error'){
+      const error=new Error(message.message||'伺服器錯誤');this.rejectRoomRequest(error);setNetworkStatus(error.message,'error');setOnlineLobbyState('error','房間建立失敗');toast(error.message);$('#online-create').disabled=false;$('#online-join').disabled=false;
+    }
   }
   startMatch(message){
-    this.started=true;this.tick=0;this.commandQueue.clear();currentMatchMode='online';
-    const players=message.players??{},localInfo=players[this.sideId]??this.playerInfo??{},remoteId=this.sideId==='player'?'rival':'player',remoteInfo=players[remoteId]??{};
+    this.started=true;this.tick=0;this.commandQueue.clear();currentMatchMode='online';this.players=message.players??this.players;
+    const players=this.players,localInfo=players[this.sideId]??this.playerInfo??{},remoteId=this.sideId==='player'?'rival':'player',remoteInfo=players[remoteId]??{};
     const localLoadout=normalizeHeroLoadout(localInfo.loadout,selectedHeroIds),remoteLoadout=normalizeHeroLoadout(remoteInfo.loadout,DEFAULT_RIVAL_LOADOUT);
-    $('#match-player-name').textContent=localInfo.name||profile.playerName||'玩家';
-    $('#match-rival-name').textContent=remoteInfo.name||'對手玩家';
-    $('#match-player-rank').textContent=playerRankProgress(profile.playerExperience).rank.name;
-    $('#match-rival-rank').textContent='真人';
-    $('#player-loadout-text').textContent=heroNames(localLoadout).join('・');
-    $('#rival-loadout-text').textContent=heroNames(remoteLoadout).join('・');
+    $('#match-player-name').textContent=localInfo.name||profile.playerName||'玩家';$('#match-rival-name').textContent=remoteInfo.name||'對手玩家';
+    $('#match-player-rank').textContent=playerRankProgress(profile.playerExperience).rank.name;$('#match-rival-rank').textContent='真人';
+    $('#player-loadout-text').textContent=heroNames(localLoadout).join('・');$('#rival-loadout-text').textContent=heroNames(remoteLoadout).join('・');
+    $('#player-ready-state').textContent='已準備';$('#player-ready-state').classList.add('ready');$('#rival-ready-state').textContent='已準備';$('#rival-ready-state').classList.add('ready');
     document.querySelectorAll('.modal.visible').forEach(modal=>{modal.classList.remove('visible');modal.setAttribute('aria-hidden','true');});
-    showScreen('#match-screen');setNetworkStatus(`房間 ${this.roomCode}・已配對`,'connected');
-    setTimeout(()=>{showScreen('#battle-screen');createGame(localLoadout,remoteLoadout,AI_OPPONENTS[1],{localSideId:this.sideId,enableAi:false,random:createSeededRandom(message.seed)});currentMatchMode='online';last=performance.now();setNetworkStatus(`聯機・${this.sideId==='player'?'玩家一':'玩家二'}`,'connected');},900);
+    const matchScreen=$('#match-screen'),title=$('#match-screen .match-title'),readyButton=$('#online-ready-button');
+    matchScreen.classList.remove('online-waiting');matchScreen.classList.add('online-countdown');readyButton.disabled=true;
+    showScreen('#match-screen');setNetworkStatus(`房間 ${this.roomCode}・即將開始`,'connected');
+    const delay=Math.max(3000,Number(message.startDelayMs)||3000),startedAt=performance.now();
+    const updateCountdown=()=>{const remaining=Math.max(0,delay-(performance.now()-startedAt));title.textContent=remaining>0?String(Math.max(1,Math.ceil(remaining/1000))):'開戰';};
+    updateCountdown();clearInterval(this.countdownTimer);this.countdownTimer=setInterval(updateCountdown,100);
+    setTimeout(()=>{clearInterval(this.countdownTimer);this.countdownTimer=null;matchScreen.classList.remove('online-countdown');title.textContent='列隊等待';showScreen('#battle-screen');createGame(localLoadout,remoteLoadout,AI_OPPONENTS[1],{localSideId:this.sideId,enableAi:false,random:createSeededRandom(message.seed)});currentMatchMode='online';last=performance.now();setNetworkStatus(`聯機・${this.sideId==='player'?'玩家一':'玩家二'}`,'connected');},delay);
   }
-  disconnect(){this.stopHeartbeat();try{this.socket?.close();}catch{}this.socket=null;this.started=false;}
+  disconnect(silent=false){this.intentionalClose=Boolean(silent);this.stopHeartbeat();if(this.countdownTimer)clearInterval(this.countdownTimer);this.countdownTimer=null;this.rejectRoomRequest(new Error('已取消連線'));try{this.socket?.close();}catch{}this.socket=null;this.started=false;}
 }
 
 function applyGameCommand(command){
@@ -5882,27 +5949,43 @@ $('#confirm-loadout').addEventListener('click',()=>{
 });
 $('#online-button').addEventListener('click',()=>{
   const modal=$('#online-modal');
-  $('#online-server-url').value=$('#online-server-url').value||defaultWebSocketUrl();
-  setNetworkStatus('尚未連線');modal.classList.add('visible');modal.setAttribute('aria-hidden','false');
+  $('#online-create').disabled=false;$('#online-join').disabled=false;
+  modal.classList.add('visible');modal.setAttribute('aria-hidden','false');
+  checkOnlineServer({interactive:false}).catch(()=>{});
+  setTimeout(()=>$('#online-room-code').focus(),60);
 });
 async function beginOnlineRoom(mode){
-  const url=$('#online-server-url').value.trim()||defaultWebSocketUrl(),code=$('#online-room-code').value.trim().toUpperCase();
-  if(mode==='join'&&!code){toast('先輸入房間代碼');return;}
-  $('#online-create').disabled=true;$('#online-join').disabled=true;setNetworkStatus('正在連線…','waiting');
+  const code=$('#online-room-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+  if(!code){setOnlineModalStatus('先輸入房間代號','error');return;}
+  $('#online-room-code').value=code;
+  $('#online-create').disabled=true;$('#online-join').disabled=true;
+  setOnlineLobbyState('waking','正在連線…');setOnlineModalStatus('正在確認伺服器與房間…','waking');
   try{
-    onlineSession?.disconnect?.();onlineSession=new OnlineSession(url);await onlineSession.connect();
+    await checkOnlineServer({interactive:true});
+    onlineSession?.disconnect?.(true);
+    const session=new OnlineSession(defaultWebSocketUrl());
+    onlineSession=session;
+    await session.connect();
     const info={name:profile.playerName||'玩家',loadout:normalizeHeroLoadout(selectedHeroIds)};
-    mode==='create'?onlineSession.createRoom(info):onlineSession.joinRoom(code,info);
-  }catch(error){setNetworkStatus(error?.message||'連線失敗','error');toast(error?.message||'連線失敗');$('#online-create').disabled=false;$('#online-join').disabled=false;}
+    await session.requestRoom(mode,code,info);
+  }catch(error){
+    const message=error?.name==='AbortError'?'伺服器喚醒逾時，請再按一次':error?.message||'連線失敗';
+    setOnlineModalStatus(message,'error');setOnlineLobbyState('error','點擊重新連線');
+    if(onlineSession&&!onlineSession.sideId)onlineSession.disconnect(true);
+    $('#online-create').disabled=false;$('#online-join').disabled=false;
+  }
 }
 $('#online-create').addEventListener('click',()=>beginOnlineRoom('create'));
 $('#online-join').addEventListener('click',()=>beginOnlineRoom('join'));
-$('#online-room-code').addEventListener('input',event=>{event.target.value=event.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);});
-$('#mirror-test-button').addEventListener('click',()=>{
-  pendingOfflineViewSide='rival';
-  const modal=$('#online-modal');modal.classList.remove('visible');modal.setAttribute('aria-hidden','true');
-  toast('下一場單機將用玩家二鏡像視角');$('#start-button').click();
+$('#online-room-code').addEventListener('input',event=>{event.target.value=event.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);});
+$('#online-room-code').addEventListener('keydown',event=>{if(event.key==='Enter')beginOnlineRoom('join');});
+$('#online-modal').addEventListener('click',event=>{
+  if(event.target!==event.currentTarget)return;
+  onlineSession?.disconnect?.(true);onlineSession=null;
+  $('#online-create').disabled=false;$('#online-join').disabled=false;
+  event.currentTarget.classList.remove('visible');event.currentTarget.setAttribute('aria-hidden','true');
 });
+$('#online-ready-button').addEventListener('click',()=>{if(!onlineSession||onlineSession.started)return;onlineSession.setReady(!onlineSession.localReady);});
 
 $('#start-button').addEventListener('click',()=>{
   if(selectedHeroIds.length!==HERO_LOADOUT_SIZE)return;
@@ -5914,6 +5997,7 @@ $('#start-button').addEventListener('click',()=>{
   const playerRankInfo=playerRankProgress(profile.playerExperience).rank;
   const aiOpponent=randomAiOpponent();
   const rivalLoadout=randomAiHeroLoadout();
+  $('#match-screen').classList.remove('online-waiting','online-countdown');$('#online-ready-button').disabled=true;$('#match-screen .match-title').textContent='列隊等待';
   $('#match-rival-name').textContent=aiOpponent.name;
   $('#match-rival-rank').textContent=aiOpponent.rank;
   $('#match-player-name').textContent=profile.playerName;
@@ -5993,6 +6077,7 @@ $('#claim').addEventListener('click',()=>{
 function frame(now){const dt=Math.min(.033,(now-last)/1000);last=now;if(engine){if(!isPaused&&currentMatchMode!=='online'){engine.update(dt);updateActiveSkillCooldowns(dt);}renderer.render();if(inspectedBattleUnitId&&$('#unit-modal').classList.contains('visible')&&now-lastDpsRefreshAt>=250){const inspected=findBattleEntityById(inspectedBattleUnitId);if(inspected)renderInspectedBattleUnit(inspected);lastDpsRefreshAt=now;}}requestAnimationFrame(frame);}
 renderProfileHeader();
 renderHeroBag();
+checkOnlineServer({interactive:false}).catch(()=>{});
 requestAnimationFrame(frame);
 
 </script>
@@ -6007,6 +6092,8 @@ requestAnimationFrame(frame);
 <!-- v0.10.0：怪物經驗改為每波線性增加20%；擊殺與助攻皆取得怪物完整經驗，助攻不再減半。 -->
 <!-- v0.10.0：建立玩家一／玩家二角色、可交換的本機視角、房間 WebSocket 協定與伺服器時鐘操作骨架；本機玩家永遠顯示於下方。 -->
 <!-- v0.10.1：Render 同源 WSS 上線包、20 秒心跳、伺服器更新通知與連線按鈕復原。 -->
+<!-- v0.10.2：房間代號由玩家自訂；入口精簡為一個輸入框與建立／加入；列隊畫面新增雙方準備狀態及三秒倒數，本機玩家永遠在下方。 -->
+<!-- v0.10.3：延長 Render 休眠喚醒等待、增加房間建立回覆逾時與可見錯誤訊息；移除聯機視窗叉號，首頁聯機按鈕新增伺服器狀態燈。 -->
 </body>
 </html>
 <!-- v0.8.27: replaced broken mantou and heart artwork with repaired transparent assets; save keys unchanged. -->
