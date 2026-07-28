@@ -9,7 +9,7 @@ const os = require('node:os');
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
-const APP_VERSION = '0.10.7';
+const APP_VERSION = '0.10.18';
 const PROTOCOL_VERSION = 4;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
@@ -29,7 +29,8 @@ function contentType(filename) {
     '.md': 'text/markdown; charset=utf-8',
     '.png': 'image/png',
     '.webp': 'image/webp',
-    '.svg': 'image/svg+xml'
+    '.svg': 'image/svg+xml',
+    '.mp3': 'audio/mpeg'
   }[ext] || 'application/octet-stream';
 }
 

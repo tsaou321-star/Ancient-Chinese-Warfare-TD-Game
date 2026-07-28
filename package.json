@@ -1,8 +1,8 @@
 {
   "name": "save-the-lord-online",
-  "version": "0.10.7",
+  "version": "0.10.18",
   "private": true,
-  "description": "還不快救主！簡化同源直連、AI 隨機帽與隨機武將聯機伺服器",
+  "description": "還不快救主！AI攻速統一與武將特效優化版",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

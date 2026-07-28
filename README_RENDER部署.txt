@@ -1,29 +1,25 @@
-還不快救主！v0.10.7 同源直連 AI 隨機帽版
+還不快救主！v0.10.18 AI攻速與武將特效優化版
 
-本工程同時包含遊戲網頁與 WebSocket 房間伺服器，必須部署成 Render「Web Service」，不是 Static Site。
-
-【本機測試】
-1. 解壓縮工程包。
-2. 在工程資料夾執行 npm install。
-3. 執行 npm start。
-4. 瀏覽器開啟 http://localhost:8787。
-5. 遊戲會自動連線 ws://localhost:8787/ws。
-
-直接雙擊 index.html 時，因 file:// 沒有主機名稱，聯機也只會嘗試 localhost:8787，不會呼叫任何 Render 網址；但仍建議用 npm start 後從 localhost 開啟。
+【完整工程包內容】
+- index.html：完整遊戲頁，已內嵌黃忠煙火素材。
+- server.js：Node WebSocket 房間伺服器。
+- package.json / package-lock.json：Node 啟動設定。
+- render.yaml：Render Web Service 自動部署設定。
+- .gitignore：Git 忽略規則。
+- 修改測試說明.md：本版修改與測試項目。
 
 【Render 部署】
-- Runtime：Node
-- Build Command：npm install
-- Start Command：npm start
-- Health Check Path：/health
+1. 把本資料夾內所有檔案上傳到 GitHub 儲存庫根目錄。
+2. Render 會依 render.yaml 建立 Node Web Service。
+3. Build Command：npm install
+4. Start Command：npm start
+5. Health Check：/health
+6. 遊戲頁與 WebSocket 使用同一個 Render 網址。
 
-部署在 https://任何名稱.onrender.com 時，遊戲會自動連線 wss://同一個網址/ws。更換 Render 專案名稱或自訂網域，不需要修改 HTML。
+【本版主要修改】
+- 所有 AI 攻速倍率統一為 1.00，只保留傷害倍率差異。
+- 劉備技能期間，己方單位文字變色並發光。
+- 趙雲改為 CD 7 秒、2 秒內來回衝殺最多 7 名敵人，每名承受 150% 傷害兩次。
+- 黃忠使用玩家提供並已去背的爆光素材，素材已嵌入 HTML。
 
-【v0.10.7 修改】
-- 移除複雜的網址覆寫與 URL 解析流程。
-- WebSocket 直接使用 location.host；本機就是本機，Render 就是目前 Render。
-- 聯機畫面不再顯示「正在喚醒 Render」，統一稱作房間伺服器。
-- 單機 AI 每場隨機選用一頂帽子，所有帽子等機率。
-- 已確認 AI 武將原本就是每場從完整武將名單隨機抽四名且不重複，本版保留。
-
-注意：localhost、file:// 與各個網站網域的 localStorage 彼此隔離，存檔不會自動共用。
+部署時請使用完整工程包，不要只替換 HTML。
