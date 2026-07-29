@@ -1,25 +1,27 @@
-還不快救主！v0.10.18 AI攻速與武將特效優化版
+還不快救主！v0.10.56 最終清理體檢版
 
-【完整工程包內容】
-- index.html：完整遊戲頁，已內嵌黃忠煙火素材。
-- server.js：Node WebSocket 房間伺服器。
-- package.json / package-lock.json：Node 啟動設定。
-- render.yaml：Render Web Service 自動部署設定。
-- .gitignore：Git 忽略規則。
-- 修改測試說明.md：本版修改與測試項目。
+啟動方式
+1. 單機：直接開啟 index.html。
+2. 本機伺服器／聯機：安裝 Node.js 20 以上版本後，在工程資料夾執行 npm start。
+3. Render：將完整工程上傳至 GitHub，再使用 render.yaml 建立服務。
 
-【Render 部署】
-1. 把本資料夾內所有檔案上傳到 GitHub 儲存庫根目錄。
-2. Render 會依 render.yaml 建立 Node Web Service。
-3. Build Command：npm install
-4. Start Command：npm start
-5. Health Check：/health
-6. 遊戲頁與 WebSocket 使用同一個 Render 網址。
+本版核心
+- 保留原塔防、武將技能、武將府、武器頁、天賦、存檔及聯機功能。
+- 每完成第 10、20、30……波，進入 10 秒麻煩卡三選一。
+- 黃巾之亂、急行、難題、動物園皆為該局永久效果，且可重複累積。
+- 單機 AI 自動選牌；玩家逾時亦會自動選牌。
+- 新增美術全部內嵌於 index.html，手機單獨開啟 HTML 也能顯示。
+- 遊戲資源名稱統一為「包子」。
 
-【本版主要修改】
-- 所有 AI 攻速倍率統一為 1.00，只保留傷害倍率差異。
-- 劉備技能期間，己方單位文字變色並發光。
-- 趙雲改為 CD 7 秒、2 秒內來回衝殺最多 7 名敵人，每名承受 150% 傷害兩次。
-- 黃忠使用玩家提供並已去背的爆光素材，素材已嵌入 HTML。
+v0.10.56 清理內容
+- 移除未被遊戲引用的外部素材備份資料夾。
+- 移除過時測試報告、歷史更新註解、重複包子／古錢圖片與無引用程式。
+- 保留存檔鍵值、聯機協定 6、武將技能與戰鬥規則，避免舊存檔失效。
+- 伺服器只公開遊戲頁與健康檢查，不再對外提供工程原始碼或說明文件。
 
-部署時請使用完整工程包，不要只替換 HTML。
+主要文件
+- index.html：完整單機遊戲及所有內嵌美術。
+- server.js：HTTP 與 WebSocket 聯機伺服器。
+- render.yaml：Render 部署設定。
+- 修改測試說明_v0.10.56.md
+- 測試報告_v0.10.56.md

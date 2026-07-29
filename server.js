@@ -9,30 +9,16 @@ const os = require('node:os');
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
-const APP_VERSION = '0.10.18';
-const PROTOCOL_VERSION = 4;
+const APP_VERSION = '0.10.56';
+const PROTOCOL_VERSION = 6;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
 const START_DELAY_MS = 3000;
 const MAX_MESSAGE_BYTES = 64 * 1024;
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const VALID_COMMANDS = new Set(['recruit', 'drop', 'dropToBench', 'activeSkill', 'surrender']);
+const VALID_COMMANDS = new Set(['recruit', 'drop', 'dropToBench', 'activeSkill', 'pangStrategy', 'troubleCard', 'surrender']);
 const HEARTBEAT_INTERVAL_MS = 25000;
 const PEER_TIMEOUT_MS = 70000;
-
-function contentType(filename) {
-  const ext = path.extname(filename).toLowerCase();
-  return {
-    '.html': 'text/html; charset=utf-8',
-    '.js': 'text/javascript; charset=utf-8',
-    '.json': 'application/json; charset=utf-8',
-    '.md': 'text/markdown; charset=utf-8',
-    '.png': 'image/png',
-    '.webp': 'image/webp',
-    '.svg': 'image/svg+xml',
-    '.mp3': 'audio/mpeg'
-  }[ext] || 'application/octet-stream';
-}
 
 function sendHttp(res, status, body, type = 'text/plain; charset=utf-8') {
   res.writeHead(status, {
@@ -57,25 +43,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  let filename;
-  if (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/game.html') {
-    filename = GAME_FILE;
-  } else {
-    const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '');
-    const resolved = path.resolve(ROOT, relative);
-    if (!resolved.startsWith(path.resolve(ROOT) + path.sep)) {
-      sendHttp(res, 403, 'Forbidden');
-      return;
-    }
-    filename = resolved;
+  if (url.pathname !== '/' && url.pathname !== '/index.html' && url.pathname !== '/game.html') {
+    sendHttp(res, 404, 'Not Found');
+    return;
   }
 
-  fs.readFile(filename, (error, data) => {
+  fs.readFile(GAME_FILE, (error, data) => {
     if (error) {
-      sendHttp(res, error.code === 'ENOENT' ? 404 : 500, error.code === 'ENOENT' ? 'Not Found' : 'Server Error');
+      sendHttp(res, 500, 'Server Error');
       return;
     }
-    sendHttp(res, 200, data, contentType(filename));
+    sendHttp(res, 200, data, 'text/html; charset=utf-8');
   });
 });
 
@@ -150,7 +128,7 @@ class WebSocketPeer {
     if (now - this.rateWindowStarted >= 1000) {
       this.rateWindowStarted = now;
       this.rateCount = 0;
-    this.lastPongAt = Date.now();
+      this.lastPongAt = Date.now();
     }
     this.rateCount += 1;
     return this.rateCount <= 40;
@@ -370,9 +348,12 @@ function sanitizePlayer(player) {
   const rawHatId = typeof player?.hatId === 'string' ? player.hatId.trim() : '';
   const hatId = /^[a-z0-9_-]{1,40}$/i.test(rawHatId) ? rawHatId : null;
   const loadout = Array.isArray(player?.loadout)
-    ? player.loadout.map(value => String(value).slice(0, 40)).filter(Boolean).slice(0, 4)
+    ? [...new Set(player.loadout.map(value => String(value).slice(0, 40)).filter(Boolean))]
     : [];
-  return { name, rank, hatId, loadout };
+  const passiveTalents = Array.isArray(player?.passiveTalents)
+    ? [...new Set(player.passiveTalents.map(value => String(value).slice(0, 40)).filter(Boolean))].slice(0, 6)
+    : [];
+  return { name, rank, hatId, loadout, passiveTalents };
 }
 
 function integer(value, min, max) {
@@ -396,6 +377,18 @@ function sanitizeSource(source) {
 function sanitizeCommand(command, assignedSideId) {
   if (!command || typeof command !== 'object' || !VALID_COMMANDS.has(command.type)) return null;
   if (command.type === 'recruit' || command.type === 'surrender') return { type: command.type, sideId: assignedSideId };
+  if (command.type === 'pangStrategy') {
+    const strategyId = String(command.strategyId || '');
+    return ['upper', 'middle', 'lower'].includes(strategyId)
+      ? { type: 'pangStrategy', sideId: assignedSideId, strategyId }
+      : null;
+  }
+  if (command.type === 'troubleCard') {
+    const cardId = String(command.cardId || '');
+    return ['yellow-turban', 'forced-march', 'hard-problem', 'zoo'].includes(cardId)
+      ? { type: 'troubleCard', sideId: assignedSideId, cardId }
+      : null;
+  }
   if (command.type === 'drop') {
     const source = sanitizeSource(command.source);
     const col = integer(command.col, 0, 7);
