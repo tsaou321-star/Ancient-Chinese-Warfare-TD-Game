@@ -5,20 +5,33 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const zlib = require('node:zlib');
 
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = __dirname;
-const APP_VERSION = '0.10.87';
+const APP_VERSION = '0.10.88';
 const PROTOCOL_VERSION = 6;
 const GAME_FILE = path.join(ROOT, 'index.html');
 const TICK_RATE = 30;
+const TICK_BROADCAST_RATE = 10;
 const START_DELAY_MS = 3000;
 const MAX_MESSAGE_BYTES = 64 * 1024;
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const VALID_COMMANDS = new Set(['recruit', 'drop', 'dropToBench', 'activeSkill', 'pangStrategy', 'troubleCard', 'surrender']);
 const HEARTBEAT_INTERVAL_MS = 25000;
 const PEER_TIMEOUT_MS = 70000;
+const GAME_HTML = fs.readFileSync(GAME_FILE);
+const GAME_GZIP = zlib.gzipSync(GAME_HTML, { level: 6 });
+const GAME_ETAG = `"${APP_VERSION}-${crypto.createHash('sha256').update(GAME_HTML).digest('base64url').slice(0, 16)}"`;
+
+function parseRequestUrl(req) {
+  try {
+    return new URL(req.url || '/', 'http://localhost');
+  } catch {
+    return null;
+  }
+}
 
 function contentType(filename) {
   const ext = path.extname(filename).toLowerCase();
@@ -34,15 +47,36 @@ function contentType(filename) {
   }[ext] || 'application/octet-stream';
 }
 
-function sendHttp(res, status, body, type = 'text/plain; charset=utf-8') {
+function sendHttp(res, status, body, type = 'text/plain; charset=utf-8', extraHeaders = {}) {
   res.writeHead(status, {
     'content-type': type,
     'cache-control': 'no-store',
     'access-control-allow-origin': '*',
     'cross-origin-resource-policy': 'cross-origin',
-    'x-content-type-options': 'nosniff'
+    'x-content-type-options': 'nosniff',
+    ...extraHeaders
   });
   res.end(body);
+}
+
+function sendGame(req, res) {
+  const commonHeaders = {
+    'cache-control': 'public, max-age=300, must-revalidate',
+    etag: GAME_ETAG,
+    vary: 'Accept-Encoding'
+  };
+  if (req.headers['if-none-match'] === GAME_ETAG) {
+    sendHttp(res, 304, '', 'text/html; charset=utf-8', commonHeaders);
+    return;
+  }
+  const acceptsGzip = /(?:^|,)\s*gzip\s*(?:;|,|$)/i.test(req.headers['accept-encoding'] || '');
+  sendHttp(
+    res,
+    200,
+    acceptsGzip ? GAME_GZIP : GAME_HTML,
+    'text/html; charset=utf-8',
+    acceptsGzip ? { ...commonHeaders, 'content-encoding': 'gzip' } : commonHeaders
+  );
 }
 
 const server = http.createServer((req, res) => {
@@ -51,17 +85,28 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+  const url = parseRequestUrl(req);
+  if (!url) {
+    sendHttp(res, 400, 'Bad Request');
+    return;
+  }
   if (url.pathname === '/health') {
-    sendHttp(res, 200, JSON.stringify({ ok: true, version: APP_VERSION, protocolVersion: PROTOCOL_VERSION, rooms: rooms.size, tickRate: TICK_RATE }), 'application/json; charset=utf-8');
+    sendHttp(res, 200, JSON.stringify({ ok: true, version: APP_VERSION, protocolVersion: PROTOCOL_VERSION, rooms: rooms.size, tickRate: TICK_RATE, tickBroadcastRate: TICK_BROADCAST_RATE }), 'application/json; charset=utf-8');
     return;
   }
 
   let filename;
   if (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/game.html') {
-    filename = GAME_FILE;
+    sendGame(req, res);
+    return;
   } else {
-    const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+    let relative;
+    try {
+      relative = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+    } catch {
+      sendHttp(res, 400, 'Bad Request');
+      return;
+    }
     const resolved = path.resolve(ROOT, relative);
     if (!resolved.startsWith(path.resolve(ROOT) + path.sep)) {
       sendHttp(res, 403, 'Forbidden');
@@ -75,7 +120,10 @@ const server = http.createServer((req, res) => {
       sendHttp(res, error.code === 'ENOENT' ? 404 : 500, error.code === 'ENOENT' ? 'Not Found' : 'Server Error');
       return;
     }
-    sendHttp(res, 200, data, contentType(filename));
+    const cacheControl = url.pathname.startsWith('/assets/')
+      ? 'public, max-age=86400, stale-while-revalidate=604800'
+      : 'no-store';
+    sendHttp(res, 200, data, contentType(filename), { 'cache-control': cacheControl });
   });
 });
 
@@ -232,7 +280,11 @@ class WebSocketPeer {
 const peers = new Set();
 
 server.on('upgrade', (req, socket) => {
-  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+  const url = parseRequestUrl(req);
+  if (!url) {
+    socket.destroy();
+    return;
+  }
   if (url.pathname !== '/ws') {
     socket.destroy();
     return;
@@ -264,6 +316,7 @@ class MatchRoom {
     this.sequence = 0;
     this.timer = null;
     this.startTimer = null;
+    this.clockStartedAt = 0;
     this.createdAt = Date.now();
     this.commandLog = [];
   }
@@ -315,10 +368,11 @@ class MatchRoom {
     if (this.status !== 'starting') return;
     this.status = 'running';
     this.tick = 0;
-    const interval = 1000 / TICK_RATE;
+    this.clockStartedAt = Date.now();
+    const interval = 1000 / TICK_BROADCAST_RATE;
     this.timer = setInterval(() => {
       if (this.status !== 'running') return;
-      this.tick += 1;
+      this.tick = Math.max(this.tick + 1, Math.floor((Date.now() - this.clockStartedAt) * TICK_RATE / 1000));
       this.broadcast({ type: 'tick', tick: this.tick });
     }, interval);
   }
@@ -349,6 +403,7 @@ class MatchRoom {
     if (this.startTimer) clearTimeout(this.startTimer);
     this.timer = null;
     this.startTimer = null;
+    this.clockStartedAt = 0;
     this.status = 'closed';
   }
 }

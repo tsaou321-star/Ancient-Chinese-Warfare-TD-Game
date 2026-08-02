@@ -1,8 +1,8 @@
 {
   "name": "save-the-lord-online",
-  "version": "0.10.87",
+  "version": "0.10.88",
   "private": true,
-  "description": "還不快救主！竹笛圖示內嵌修正版",
+  "description": "還不快救主！Render 流暢修正版",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
